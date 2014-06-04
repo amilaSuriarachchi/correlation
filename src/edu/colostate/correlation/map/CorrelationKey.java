@@ -18,39 +18,47 @@ public class CorrelationKey implements WritableComparable<CorrelationKey> {
     //we assume all keys are sorted in alphabatical order
     private String field1;
     private String field2;
+    private String geoHash;
 
     public CorrelationKey() {
     }
 
-    public CorrelationKey(String field1, String field2) {
+    public CorrelationKey(String field1, String field2, String geoHash) {
         this.field1 = field1;
         this.field2 = field2;
+        this.geoHash = geoHash;
     }
 
     @Override
     public int compareTo(CorrelationKey key) {
-        if (this.field1.compareTo(key.field1) == 0){
-            return this.field2.compareTo(key.field2);
+        if (this.geoHash.compareTo(key.geoHash) == 0) {
+            if (this.field1.compareTo(key.field1) == 0) {
+                return this.field2.compareTo(key.field2);
+            } else {
+                return this.field1.compareTo(key.field1);
+            }
         } else {
-            return this.field1.compareTo(key.field1);
+            return this.geoHash.compareTo(key.geoHash);
         }
     }
 
     @Override
     public String toString() {
-        return this.field1 + "," + this.field2;
+        return this.geoHash + "," + this.field1 + "," + this.field2;
     }
 
     @Override
     public void write(DataOutput dataOutput) throws IOException {
         dataOutput.writeUTF(this.field1);
         dataOutput.writeUTF(this.field2);
+        dataOutput.writeUTF(this.geoHash);
     }
 
     @Override
     public void readFields(DataInput dataInput) throws IOException {
         this.field1 = dataInput.readUTF();
         this.field2 = dataInput.readUTF();
+        this.geoHash = dataInput.readUTF();
     }
 
     public String getField1() {
