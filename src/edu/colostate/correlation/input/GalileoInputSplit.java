@@ -16,13 +16,16 @@ import java.io.IOException;
  */
 public class GalileoInputSplit extends InputSplit implements Writable {
 
-    private String location;
+    private String[] locations;
+    private String folder;
 
     public GalileoInputSplit() {
+
     }
 
-    public GalileoInputSplit(String location) {
-        this.location = location;
+    public GalileoInputSplit(String[] locations, String folder) {
+        this.locations = locations;
+        this.folder = folder;
     }
 
     @Override
@@ -32,16 +35,25 @@ public class GalileoInputSplit extends InputSplit implements Writable {
 
     @Override
     public String[] getLocations() throws IOException, InterruptedException {
-        return new String[]{this.location};
+        return this.locations;
     }
 
     @Override
     public void write(DataOutput dataOutput) throws IOException {
-        dataOutput.writeUTF(this.location);
+        dataOutput.writeInt(this.locations.length);
+        for (int i = 0; i < this.locations.length; i++ ) {
+            dataOutput.writeUTF(this.locations[i]);
+        }
+        dataOutput.writeUTF(this.folder);
     }
 
     @Override
     public void readFields(DataInput dataInput) throws IOException {
-        this.location = dataInput.readUTF();
+        int size = dataInput.readInt();
+        this.locations = new String[size];
+        for (int i = 0 ; i < this.locations.length ; i++) {
+            this.locations[i] = dataInput.readUTF();
+        }
+        this.folder = dataInput.readUTF();
     }
 }

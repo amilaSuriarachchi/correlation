@@ -25,6 +25,7 @@ public class Correlator {
     public static void main(String[] args) {
         Configuration conf = new Configuration();
         conf.setStrings("input_file", args[0]);
+        conf.setStrings("input_folder", args[1]);
 
         try {
             Job job = new Job(conf, "Correlation");
@@ -36,6 +37,7 @@ public class Correlator {
             job.setOutputKeyClass(CorrelationKey.class);
             job.setOutputValueClass(DoubleWritable.class);
             job.setInputFormatClass(GalileoInputFormat.class);
+            job.setNumReduceTasks(128);
 
             FileOutputFormat.setOutputPath(job, new Path("result"));
             System.exit(job.waitForCompletion(true) ? 0 : 1);

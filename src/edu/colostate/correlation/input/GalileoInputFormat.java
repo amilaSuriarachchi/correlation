@@ -23,16 +23,26 @@ public class GalileoInputFormat extends InputFormat<IntWritable, Metadata> {
     public List<InputSplit> getSplits(JobContext jobContext) throws IOException, InterruptedException {
         List<InputSplit> inputSplits = new ArrayList<InputSplit>();
         Scanner scanner = new Scanner(new File(jobContext.getConfiguration().getStrings("input_file")[0]));
-        while (scanner.hasNext()){
-             inputSplits.add(new GalileoInputSplit(scanner.next()));
+
+        List<String> locations = new ArrayList<String>();
+        while (scanner.hasNext()) {
+            locations.add(scanner.next());
         }
         scanner.close();
+
+        String[] locationsArray = locations.toArray(new String[locations.size()]);
+
+        String inputFolder = jobContext.getConfiguration().getStrings("input_folder")[0];
+        //we going to assume data will be there only for one year and create splits per month
+        for (int i = 1; i < 13; i++) {
+            inputSplits.add(new GalileoInputSplit(locationsArray, inputFolder + "/" + i));
+        }
         return inputSplits;
     }
 
     @Override
     public RecordReader<IntWritable, Metadata> createRecordReader(
-              InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+            InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
         return new GalileoRecordReader();
     }
 }
